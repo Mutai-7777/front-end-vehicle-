@@ -4,6 +4,7 @@ import axios from 'axios';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'sonner';
+import { prodUrl } from '../utils/utils';
 
 
 const stripePromise = loadStripe('pk_test_51Pbj74Rwjm0d4hM8NTcTqVTxs5IJ3iwew5hcpgjVnsCTDlRggALgUV8Ub8MEom29gDWvMA0xGYZxEfTTd9m3ZfgU00oN6vNj7q');
@@ -45,7 +46,7 @@ function CarBookingForm() {
     // Fetch the rental rate for the vehicle
     const fetchRentalRate = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/vehicles/${vehicleId}`);
+        const response = await axios.get(`${prodUrl}/vehicles/${vehicleId}`);
         setRentalRate(response.data.rental_rate);
         console.log(response)
       } catch (error) {
@@ -95,7 +96,7 @@ function CarBookingForm() {
       console.log('Booking data is valid:', formData);
 
       // After creating the booking
-      const bookingResponse = await axios.post('http://localhost:3000/bookings', formData);
+      const bookingResponse = await axios.post(`${prodUrl}/bookings`, formData);
       console.log('Booking response:', bookingResponse.data);
      
       // Fetch the latest booking for this user and vehicle
@@ -108,7 +109,7 @@ function CarBookingForm() {
       console.log('Booking created with ID:', booking.booking_id); // Change here
       
       // Create payment intent using the booking ID
-      const paymentResponse = await axios.post('http://localhost:3000/payments', {
+      const paymentResponse = await axios.post(`${prodUrl}/payments`, {
         booking_id: booking.booking_id, // Change here
         amount: formData.total_amount,
         payment_method: 'stripe',

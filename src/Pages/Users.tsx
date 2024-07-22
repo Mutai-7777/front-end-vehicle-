@@ -1,6 +1,6 @@
 import  { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { prodUrl } from '../utils/utils';
 
 
 
@@ -25,7 +25,7 @@ function User ()  {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/users');
+      const response = await axios.get(`${prodUrl}/users`);
       setIsLoading(false);
       setUsers(response.data);
      
@@ -38,7 +38,7 @@ function User ()  {
 
   const deleteUser = async (user_id: number) => {
     try {
-      await axios.delete(`http://localhost:3000/users/${user_id}`);
+      await axios.delete(`${prodUrl}/users/${user_id}`);
       setUsers(users.filter(user => user.user_id !== user_id));
     } catch (error) {
       console.error('Error deleting user:', error);

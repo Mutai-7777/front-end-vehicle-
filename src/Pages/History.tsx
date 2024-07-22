@@ -1,5 +1,6 @@
 import  { useEffect, useState } from 'react';
 import axios from 'axios';
+import { prodUrl } from '../utils/utils';
 
 interface Booking {
   booking_id: number;
@@ -29,7 +30,7 @@ function BookingHistory () {
       }
 
       try {
-        const response = await axios.get('http://localhost:3000/bookings/');
+        const response = await axios.get(`${prodUrl}/bookings/`);
         if (Array.isArray(response.data)) {
           const filteredBookings = response.data.filter((booking: Booking) => booking.user_id === parseInt(userId, 10));
           setBookings(filteredBookings);

@@ -19,6 +19,7 @@ import PaymentForm from './Pages/Stripe';
 import BookingHistory from './Pages/History';
 import Success from './Pages/Success';
 import Contact from './Pages/Contact';
+import Layout from './Components/Layout';
 
 
 
@@ -26,7 +27,7 @@ const App: React.FC = () => {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Home />,
+      element: <Layout> <Home /></Layout>,
       errorElement: <Error />,
     },
     {
@@ -36,7 +37,7 @@ const App: React.FC = () => {
     },
     {
       path: 'about',
-      element: <About />,
+      element:<Layout> <About/></Layout>,
       errorElement: <Error />,
     },
     {
@@ -51,7 +52,7 @@ const App: React.FC = () => {
     },
     {
       path: 'Vehicles',
-      element: <Vehicles />,
+      element:<Layout> <Vehicles /></Layout>,
       errorElement: <Error />,
     },
     {
@@ -106,7 +107,7 @@ const App: React.FC = () => {
 },
 {
   path: 'contact',
-  element: <Contact />,
+  element:<Layout> <Contact /></Layout>,
   errorElement: <Error />,
 },
   ]);

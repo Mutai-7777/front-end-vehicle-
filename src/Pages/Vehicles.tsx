@@ -1,5 +1,6 @@
 import  { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { prodUrl } from '../utils/utils';
 
 function VehicleData ()  {
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -8,7 +9,7 @@ function VehicleData ()  {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://localhost:3000/vehicles')
+    fetch(`${prodUrl}/vehicles`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);

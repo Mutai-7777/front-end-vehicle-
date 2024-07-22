@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate , Link} from 'react-router-dom';
 import { Toaster,toast } from 'sonner';
+import { prodUrl
 
+  
+ } from '../utils/utils';
 interface FormState {
   email: string;
   password: string;
@@ -58,7 +61,7 @@ function Login () {
     e.preventDefault();
     if (validate()) {
       try {
-        const response = await fetch('http://localhost:3000/login', {
+        const response = await fetch(`${prodUrl}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
