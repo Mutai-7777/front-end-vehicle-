@@ -97,31 +97,23 @@ function CarBookingForm() {
       // After creating the booking
       const bookingResponse = await axios.post('http://localhost:3000/bookings', formData);
       console.log('Booking response:', bookingResponse.data);
-
-      // // Fetch the latest booking for this user and vehicle
-      // const latestBookingResponse = await axios.get('http://localhost:3000/bookings/latest', {
-      //   params: {
-      //     user_id: formData.user_id,
-      //     vehicle_id: formData.vehicle_id,
-      //   },
-      // });
-
-      // const booking =   latestBookingResponse.data;
-      // if (!booking || !booking.id) {
-      //   console.error('Full booking response:', latestBookingResponse);
-      //   throw new Error('Booking details not returned from server. Full response logged above.');
-      // }
-
-      // console.log('Booking created with ID:', booking.id);
-
-      // Create payment intent
+     
+      // Fetch the latest booking for this user and vehicle
+      const booking = bookingResponse.data;
+      if (!booking || !booking.booking_id) {  // Change here
+        console.error('Full booking response:', bookingResponse);
+        throw new Error('Booking details not returned from server. Full response logged above.');
+      }
+      
+      console.log('Booking created with ID:', booking.booking_id); // Change here
+      
+      // Create payment intent using the booking ID
       const paymentResponse = await axios.post('http://localhost:3000/payments', {
-        booking_id: 57,   //booking.id,
+        booking_id: booking.booking_id, // Change here
         amount: formData.total_amount,
         payment_method: 'stripe',
-
       });
-
+  
       const clientSecret = paymentResponse.data.client_secret;
       if (clientSecret && stripe && elements) {
         const cardElement = elements.getElement(CardElement);

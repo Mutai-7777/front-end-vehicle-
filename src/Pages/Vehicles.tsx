@@ -49,7 +49,7 @@ function VehicleData ()  {
               <p className={vehicle.availability === 'Active' ? 'text-green-700' : 'text-red-700'}>Availability: {vehicle.availability}</p>
               <p className="text-white-700">Created At: {new Date(vehicle.created_at).toLocaleDateString()}</p>
               <p className="text-white-700">Updated At: {new Date(vehicle.updated_at).toLocaleDateString()}</p>
-              // In vehicles.tsx
+            
 <Link to={`/Booking/${vehicle.vehicle_id}`}>
   <button className="px-12 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300">
     Book
