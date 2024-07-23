@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { Navigate, useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'sonner';
-import { prodUrl } from '../utils/utils';
-
+import { useFetchRentalRateQuery, useCreateBookingMutation, useCreatePaymentIntentMutation } from './BookingAPI';
 
 const stripePromise = loadStripe('pk_test_51Pbj74Rwjm0d4hM8NTcTqVTxs5IJ3iwew5hcpgjVnsCTDlRggALgUV8Ub8MEom29gDWvMA0xGYZxEfTTd9m3ZfgU00oN6vNj7q');
 
@@ -30,63 +28,53 @@ function CarBookingForm() {
     total_amount: 0,
     booking_status: 'Pending',
   });
-  const [rentalRate, setRentalRate] = useState<number>(0);
+
+  // Fetch rental rate and convert it to a number
+  const { data: rentalRateData, isLoading: isLoadingRate } = useFetchRentalRateQuery(parseInt(vehicleId || '0'));
+  const rentalRate = rentalRateData ? parseFloat(rentalRateData.rental_rate) : 0; // Convert to number
+
+  const [createBooking, { isLoading: isCreatingBooking }] = useCreateBookingMutation();
+  const [createPaymentIntent, { isLoading: isCreatingPaymentIntent }] = useCreatePaymentIntentMutation();
 
   const stripe = useStripe();
   const elements = useElements();
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
       user_id: userId ? parseInt(userId) : 0,
       vehicle_id: parseInt(vehicleId || '0'),
     }));
-
-    // Fetch the rental rate for the vehicle
-    const fetchRentalRate = async () => {
-      try {
-        const response = await axios.get(`${prodUrl}/vehicles/${vehicleId}`);
-        setRentalRate(response.data.rental_rate);
-        
-      } catch (error) {
-        console.error('Error fetching rental rate:', error);
-      }
-    };
-
-    fetchRentalRate();
   }, [vehicleId]);
+
+  useEffect(() => {
+    if (formData.booking_date && formData.return_date && !isNaN(rentalRate)) { // Check rentalRate validity
+      const days = calculateDays(formData.booking_date, formData.return_date);
+      const totalAmount = days * rentalRate;
+      setFormData((prevData) => ({
+        ...prevData,
+        total_amount: totalAmount,
+      }));
+    }
+  }, [formData.booking_date, formData.return_date, rentalRate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'total_amount' || name === 'user_id' || name === 'vehicle_id' || name === 'location_id'
-        ? parseInt(value)
+      [name]: ['total_amount', 'user_id', 'vehicle_id', 'location_id'].includes(name)
+        ? parseInt(value) || 0 // Handle NaN and default to 0
         : value,
     });
-
-    if (name === 'booking_date' || name === 'return_date') {
-      const bookingDate = name === 'booking_date' ? value : formData.booking_date;
-      const returnDate = name === 'return_date' ? value : formData.return_date;
-      if (bookingDate && returnDate) {
-        const days = calculateDays(bookingDate, returnDate);
-        const totalAmount = days * rentalRate;
-        console.log(rentalRate)
-        setFormData(prevData => ({
-          ...prevData,
-          total_amount: totalAmount,
-        }));
-      }
-    }
   };
 
   const calculateDays = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return diffDays >= 0 ? diffDays : 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,29 +82,23 @@ function CarBookingForm() {
 
     try {
       validateFormData(formData);
-      console.log('Booking data is valid:', formData);
 
-      // After creating the booking
-      const bookingResponse = await axios.post(`${prodUrl}/bookings`, formData);
-      console.log('Booking response:', bookingResponse.data);
-     
-      // Fetch the latest booking for this user and vehicle
-      const booking = bookingResponse.data;
-      if (!booking || !booking.booking_id) {  // Change here
+      const bookingResponse = await createBooking(formData).unwrap();
+      const booking = bookingResponse;
+
+      if (!booking || !booking.booking_id) {
         console.error('Full booking response:', bookingResponse);
         throw new Error('Booking details not returned from server. Full response logged above.');
       }
-      
-      console.log('Booking created with ID:', booking.booking_id); // Change here
-      
-      // Create payment intent using the booking ID
-      const paymentResponse = await axios.post(`${prodUrl}/payments`, {
-        booking_id: booking.booking_id, // Change here
+
+      const paymentResponse = await createPaymentIntent({
+        booking_id: booking.booking_id,
         amount: formData.total_amount,
         payment_method: 'stripe',
-      });
-  
-      const clientSecret = paymentResponse.data.client_secret;
+      }).unwrap();
+
+      const clientSecret = paymentResponse.client_secret;
+
       if (clientSecret && stripe && elements) {
         const cardElement = elements.getElement(CardElement);
         const paymentResult = await stripe.confirmCardPayment(clientSecret, {
@@ -130,22 +112,13 @@ function CarBookingForm() {
           console.error('Stripe checkout error:', paymentResult.error.message);
           toast.error('Payment error: ' + paymentResult.error.message);
         } else if (paymentResult.paymentIntent?.status === 'succeeded') {
-          console.log('Payment successful!');
           toast.success('Booking and payment successful');
-        
+           return <Navigate to="Userprofile" />
         }
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error:', error.response?.data || error.message);
-        toast.error(`Booking error: ${error.response?.data?.error || error.message}`);
-      } else if (error instanceof Error) {
-        console.error('An unexpected error occurred:', error.message);
-        toast.error(error.message);
-      } else {
-        console.error('An unknown error occurred:', error);
-        toast.error('An unknown error occurred during booking');
-      }
+    } catch (error: any) {
+      console.error('Error during booking and payment process:', error);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
@@ -194,7 +167,7 @@ function CarBookingForm() {
           />
         </label>
         <label className="block">
-         Location ID:
+          Location ID:
           <input 
             type="number" 
             name="location_id" 
@@ -267,9 +240,18 @@ function CarBookingForm() {
         </div>
         <button 
           type="submit" 
-          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700"
+          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
+          disabled={isLoadingRate || isCreatingBooking || isCreatingPaymentIntent} // Disable if any process is loading
         >
-          SUBMIT
+          {isCreatingBooking || isCreatingPaymentIntent ? (
+            <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">looo
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="none" stroke="currentColor" strokeWidth="4" d="M4 12a8 8 0 1 1 16 0A8 8 0 0 1 4 12z"></path>
+            </svg>
+            
+          ) : (
+            'SUBMIT'
+          )}
         </button>
       </form>
     </div>

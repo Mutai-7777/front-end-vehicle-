@@ -25,6 +25,11 @@ function SideNav({ onSelect }: SideNavProps) {
         </button>
       </li>
       <li>
+        <button onClick={() => onSelect('Ticket')}>
+          <Bus /> Ticket
+        </button>
+      </li>
+      <li>
         <button onClick={() => onSelect('history')}>
           <History /> History
         </button>

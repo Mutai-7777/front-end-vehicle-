@@ -4,7 +4,7 @@ function Me() {
   return (
     <>
     <UserCard/>
-    <div className="p-6 bg-gray-100 min-h-screen">
+    {/* <div className="p-6 bg-gray-100 min-h-screen">
       <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
         <div className="text-3xl font-bold">Balance Details</div>
         
@@ -59,7 +59,7 @@ function Me() {
           </table>
         </div>
       </div>
-    </div>
+    </div> */}
     </>
   )
 }

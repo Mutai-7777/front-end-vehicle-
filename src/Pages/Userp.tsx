@@ -4,8 +4,9 @@ import Navbar from '../Components/Navbar';
 import SideNav from '../Components/SideNav';
 import Footer from '../Components/Footer';
 import VehicleData from './Vehicles';
-import BookingHistory from './History';
+import BookingHistory from './History/History';
 import Me from './Me';
+import Tickets from './Tickets/Tickets';
 
 
 // Define an interface for the car object
@@ -54,6 +55,8 @@ function UserCarPage () {
           return <VehicleData />;
           case 'Me':
             return <Me />;
+            case 'Ticket':
+            return <Tickets />;
       case 'history':
         return <BookingHistory/>;
        

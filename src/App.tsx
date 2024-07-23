@@ -3,10 +3,14 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import {Toaster} from 'sonner';
 import Home from './Pages/Home';
 import Error from './Pages/Error';
-import Register from './Pages/Register';
+//import Register from './Pages/Register';
+import Register from './Pages/Register/Register';
 import About from './Pages/About';
-import Booking from './Pages/Booking';
-import Login from './Pages/Login ';
+//import CarBooking from './Pages/Booking';
+
+
+import CarBooking from './Pages/Booking/Booking';
+
 import Vehicles from './Pages/Vehicles';
 import UserCarPage from './Pages/Userp';
 import AdminPage from './Pages/Admin';
@@ -16,7 +20,8 @@ import Users from './Pages/Users';
 import './App.css'
 import Me from './Pages/Me';
 import PaymentForm from './Pages/Stripe';
-import BookingHistory from './Pages/History';
+//import BookingHistory from './Pages/History';
+import BookingHistory from './Pages/History/History';
 import Success from './Pages/Success';
 import Contact from './Pages/Contact';
 import Layout from './Components/Layout';
@@ -42,14 +47,10 @@ const App: React.FC = () => {
     },
     {
       path: 'Booking',
-      element: <Booking />,
+      element: <CarBooking />,
       errorElement: <Error />,
     },
-    {
-      path: 'nnn',
-      element: <Login />,
-      errorElement: <Error />,
-    },
+
     {
       path: 'Vehicles',
       element:<Layout> <Vehicles /></Layout>,
@@ -92,7 +93,7 @@ const App: React.FC = () => {
     },
 {
   path: 'Booking/:vehicleId',
-  element: <Booking />,
+  element: <CarBooking />,
   errorElement: <Error />,
 },
 {
