@@ -47,6 +47,7 @@ function Login() {
       // Check the decoded token for roles and navigate accordingly
       if (decodedToken.role === 'admin') {
         navigate('/Admin');
+        toast.success('Login Successful');
       } else if (decodedToken.role === 'user') {
         navigate('/Userprofile');
         toast.success('Login Successful');

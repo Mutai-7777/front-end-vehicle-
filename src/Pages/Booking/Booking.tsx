@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import {  useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'sonner';
@@ -113,7 +113,7 @@ function CarBookingForm() {
           toast.error('Payment error: ' + paymentResult.error.message);
         } else if (paymentResult.paymentIntent?.status === 'succeeded') {
           toast.success('Booking and payment successful');
-           return <Navigate to="Userprofile" />
+        
         }
       }
     } catch (error: any) {

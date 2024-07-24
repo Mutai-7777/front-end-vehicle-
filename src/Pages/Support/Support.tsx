@@ -23,6 +23,7 @@ function Support() {
   const handleDelete = async (ticketId: number) => {
     try {
       await deleteTicket(ticketId).unwrap();
+      
       toast.success('Ticket deleted successfully');
     } catch (error) {
       console.error('Error deleting ticket:', error);
@@ -58,7 +59,7 @@ function Support() {
                 onClick={() => handleDelete(ticket.ticket_id)}
                 disabled={isDeleting}
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>

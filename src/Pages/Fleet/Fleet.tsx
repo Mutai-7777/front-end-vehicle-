@@ -1,33 +1,40 @@
 import { useState } from 'react';
-import { useFetchFleetsQuery, useCreateFleetMutation } from './FleetAPI';
-
+import {
+  useFetchFleetsQuery,
+  useCreateFleetMutation,
+  useUpdateFleetMutation,
+  useDeleteFleetMutation,
+} from './FleetAPI';
 import { toast } from 'sonner';
 
-
 interface Fleet {
-    fleet_id: number;
-    vehicle_id: number;
-    acquisition_date: string;
-    depreciation_rate: string;
-    current_value: string;
-    maintenance_cost: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-  }
+  fleet_id: number;
+  vehicle_id: number;
+  acquisition_date: string;
+  depreciation_rate: number;
+  current_value: number;
+  maintenance_cost: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 function Fleet() {
   const { data: fleets = [], error, isLoading } = useFetchFleetsQuery();
   const [createFleet, { isLoading: isCreatingFleet }] = useCreateFleetMutation();
+  const [updateFleet] = useUpdateFleetMutation();
+  const [deleteFleet] = useDeleteFleetMutation();
 
   const [formData, setFormData] = useState({
+    fleet_id: 0,
     vehicle_id: 0,
     acquisition_date: '',
     depreciation_rate: 0,
     current_value: 0,
     maintenance_cost: 0,
-    status: ''
+    status: '',
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,20 +49,41 @@ function Fleet() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      console.log('Submitting form data:', formData);
-      await createFleet(formData).unwrap();
-      toast.success('Fleet created successfully!');
+      if (isEditing) {
+        await updateFleet(formData).unwrap();
+        toast.success('Fleet updated successfully!');
+      } else {
+        await createFleet(formData).unwrap();
+        toast.success('Fleet created successfully!');
+      }
       setFormData({
+        fleet_id: 0,
         vehicle_id: 0,
         acquisition_date: '',
         depreciation_rate: 0,
         current_value: 0,
         maintenance_cost: 0,
-        status: ''
+        status: '',
       });
+      setIsEditing(false);
     } catch (error) {
-      console.error('Error creating fleet:', error);
-      toast.error('Error creating fleet.');
+      console.error('Error submitting form data:', error);
+      toast.error('Error submitting form data.');
+    }
+  };
+
+  const handleEdit = (fleet: Fleet) => {
+    setFormData(fleet);
+    setIsEditing(true);
+  };
+
+  const handleDelete = async (fleet_id: number) => {
+    try {
+      await deleteFleet(fleet_id).unwrap();
+      toast.success('Fleet deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting fleet:', error);
+      toast.error('Error deleting fleet.');
     }
   };
 
@@ -67,7 +95,7 @@ function Fleet() {
         <p>Error fetching fleet data</p>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {fleets.map((fleet:Fleet) => (
+          {fleets.map((fleet: Fleet) => (
             <div key={fleet.fleet_id} className="border border-gray-400 rounded-lg p-4 m-4 w-64 shadow-md text-left">
               <h2 className="text-xl font-bold">Fleet ID: {fleet.fleet_id}</h2>
               <p>Vehicle ID: {fleet.vehicle_id}</p>
@@ -78,6 +106,20 @@ function Fleet() {
               <p>Status: {fleet.status}</p>
               <p>Created At: {new Date(fleet.created_at).toLocaleString()}</p>
               <p>Updated At: {new Date(fleet.updated_at).toLocaleString()}</p>
+              <div className="flex justify-between mt-4">
+                <button
+                  onClick={() => handleEdit(fleet)}
+                  className="bg-yellow-500 text-white p-2 rounded"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(fleet.fleet_id)}
+                  className="bg-red-500 text-white p-2 rounded"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -143,7 +185,7 @@ function Fleet() {
           />
         </div>
         <button type="submit" className="mt-4 bg-blue-500 text-white p-2 rounded" disabled={isCreatingFleet}>
-          {isCreatingFleet ? 'Creating...' : 'Create Fleet'}
+          {isCreatingFleet ? 'Creating...' : isEditing ? 'Update Fleet' : 'Create Fleet'}
         </button>
       </form>
     </div>
