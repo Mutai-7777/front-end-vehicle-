@@ -72,7 +72,7 @@ function Register () {
       console.error('Registration failed:', error);
     }
   };
-
+ //login vavigation
   if (isRegistered) {
     return <Navigate to="/login" />;
   }

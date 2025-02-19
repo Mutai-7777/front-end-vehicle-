@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import {Toaster} from 'sonner';
+import './App.css'
 import Home from './Pages/Home';
 import Error from './Pages/Error';
 //import Register from './Pages/Register';
@@ -17,7 +18,7 @@ import AdminPage from './Pages/Admin';
 import LoginForms from './Components/Login';
 import Logins from './Pages/Login/Login';
 import Users from './Pages/Users';
-import './App.css'
+
 import Me from './Pages/Me';
 import PaymentForm from './Pages/Stripe';
 //import BookingHistory from './Pages/History';

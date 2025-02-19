@@ -10,7 +10,7 @@ function BookingHistory() {
 
   if (isLoading) return <div className="text-center">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{error.toString()}</div>;
-
+// display 
   return (
     <div className="container mx-auto mt-8">
       <h1 className="text-2xl font-bold mb-4">Booking History</h1>
