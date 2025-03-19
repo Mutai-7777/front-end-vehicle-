@@ -17,10 +17,9 @@ const Topnav = () => {
      
       <div className="flex items-center">
         <div className="flex space-x-4">
+        <Link to="/" className='text-white'>Home</Link>
             <Link to="/about" className="text-white">About</Link>
-
-         
-          <Link to="/contact" className="text-white">Contact</Link>
+            <Link to="/contact" className="text-white">Contact</Link>
           <Link to="/vehicles" className="text-white">Vehicles</Link>
             
         
